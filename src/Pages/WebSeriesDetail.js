@@ -6,8 +6,23 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { useNavigate } from "react-router-dom";
 import { API } from "../api";
+import { UserState } from "../Context/UsersProvider";
 
 export function WebSeriesDetail() {
+  // const {user} = UserState();
+  const [user, setUser] = useState();
+
+  const userDataInLocalStorage = () => {
+    const userInfo = JSON.parse(localStorage.getItem("imdb-userInfo"));
+    setUser(userInfo);
+
+    if (!userInfo) {
+      navigate("/");
+    }
+  };
+
+  useEffect(() => userDataInLocalStorage(), []);
+
   const [webSeries, setWebSeries] = useState({});
 
   const { showId } = useParams();
@@ -18,12 +33,19 @@ export function WebSeriesDetail() {
   const [crew, setCrew] = useState(true);
 
   const getShowDetail = () => {
-    fetch(`${API}/TVShows/${showId}`)
-      .then((data) => data.json())
-      .then((tvShow) => setWebSeries(tvShow));
+    if (user) {
+      fetch(`${API}/TVShows/${showId}`, {
+        method: "GET",
+        headers: {
+          "x-auth-token": `${user.token}`,
+        },
+      })
+        .then((data) => data.json())
+        .then((tvShow) => setWebSeries(tvShow));
+    }
   };
 
-  useEffect(() => getShowDetail(), []);
+  useEffect(() => getShowDetail(), [user]);
 
   const navigate = useNavigate();
 
@@ -83,7 +105,7 @@ export function WebSeriesDetail() {
     marginTop: "25px",
     marginBottom: "25px",
   };
-  return webSeries ? (
+  return webSeries && user ? (
     <div>
       <div>
         <img src={webSeries.poster} alt={webSeries.name} style={posterStyles} />
@@ -94,7 +116,7 @@ export function WebSeriesDetail() {
           endIcon={crew ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           onClick={() => setCrew(!crew)}
         >
-          Cast & Crew
+          Actors
         </Button>
         <Button
           variant="outlined"
@@ -108,7 +130,7 @@ export function WebSeriesDetail() {
           endIcon={about ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           onClick={() => setAbout(!about)}
         >
-          About
+          Producers
         </Button>
       </div>
       {crew ? (
@@ -121,7 +143,7 @@ export function WebSeriesDetail() {
           </div>
           ) 
         })} */}
-          <CastCrew showId={showId} />
+          <CastCrew showId={showId} token={user.token} />
         </div>
       ) : (
         ""
@@ -147,14 +169,16 @@ export function WebSeriesDetail() {
       )}
 
       {about ? (
-        <div>
-          <div style={divStyles}>
-            <h2 style={nameStyles}>{webSeries.name}</h2>
-            <p className="webSeries-rating" style={ratingStyles}>
-              ⭐{webSeries.rating}
-            </p>
+        <div style={castStyles}>
+          {/* {crews.map((cast) => {
+          return(
+         <div style={castContainer}>
+        <img style={picStyles} src={cast.pic} alt ={cast.name}/>
+          <p style={castName}>{cast.name}</p>
           </div>
-          <p style={summaryStyles}>{webSeries.summary}</p>
+          ) 
+        })} */}
+          <Producer showId={showId} token={user.token} />
         </div>
       ) : (
         ""
@@ -175,15 +199,51 @@ export function WebSeriesDetail() {
   );
 }
 
-function CastCrew({ showId }) {
+function CastCrew({ showId, token }) {
   const [showCast, setShowCast] = useState([]);
+  // const {user} = UserState();
 
   const getShowCrew = () => {
     fetch(`${API}/TVShows/${showId}`, {
       method: "GET",
+      headers: {
+        "x-auth-token": `${token}`,
+      },
     })
       .then((data) => data.json())
       .then((tvShow) => setShowCast(tvShow.casts));
+  };
+
+  useEffect(() => getShowCrew(), []);
+
+  const crewContainer = {
+    display: "flex",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+  };
+
+  return (
+    <div style={crewContainer}>
+      {showCast.map((crew, index) => (
+        <DisplayCast cast={crew} key={index} />
+      ))}
+    </div>
+  );
+}
+
+function Producer({ showId, token }) {
+  const [showCast, setShowCast] = useState([]);
+  // const {user} = UserState();
+
+  const getShowCrew = () => {
+    fetch(`${API}/TVShows/${showId}`, {
+      method: "GET",
+      headers: {
+        "x-auth-token": `${token}`,
+      },
+    })
+      .then((data) => data.json())
+      .then((tvShow) => setShowCast(tvShow.producers));
   };
 
   useEffect(() => getShowCrew(), []);
@@ -222,7 +282,9 @@ function DisplayCast({ cast }) {
     <div>
       <div style={castContainer}>
         <img style={picStyles} src={cast.pic} alt={cast.name} />
-        <p style={castName}>{cast.name}</p>
+        <p style={castName}>Name : {cast.name}</p>
+        <p style={castName}>Gender : {cast.gender}</p>
+        <p style={castName}>DOB : {cast.dob}</p>
       </div>
     </div>
   );

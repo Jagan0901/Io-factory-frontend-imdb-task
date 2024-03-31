@@ -8,11 +8,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API } from "../api";
-import { UserState } from './../Context/UsersProvider';
 
-function WebSeriesList({ webSeries, refresh }) {
+function WebSeriesList({ webSeries, refresh, token }) {
   const [show, setShow] = useState(true);
-  const [user] = UserState()
 
   const ratingStyles = {
     color:
@@ -43,7 +41,7 @@ function WebSeriesList({ webSeries, refresh }) {
         />
         <div className="webSeries-specs">
           <div className="webSeries-N-btn">
-            <h3 className="webSeries-name">{webSeries.name}</h3>
+            <h3 className="webSeries-name">{webSeries.name}- {webSeries.year}</h3>
             <IconButton onClick={() => setShow(!show)}>
               {show ? (
                 <ExpandLessIcon className="webSeries-toggle" />
@@ -74,8 +72,7 @@ function WebSeriesList({ webSeries, refresh }) {
                 fetch(`${API}/TVShows/${webSeries.id}`, {
                   method: "DELETE",
                   headers: {
-                    "x-auth-token":
-                      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZGJkZWYzNDYwNzhlMzVlZjM1ZDg3ZiIsImlhdCI6MTY3NTM1NTAyOX0.yavdcq05w3wK_6HYXxMq9KtJ6qVZ12E3GxuEXt_eOSo",
+                    "x-auth-token": `${token}`
                   },
                 }).then(() => refresh())
               }
