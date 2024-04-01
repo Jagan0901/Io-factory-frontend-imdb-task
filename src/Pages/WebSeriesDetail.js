@@ -36,9 +36,7 @@ export function WebSeriesDetail() {
     if (user) {
       fetch(`${API}/TVShows/${showId}`, {
         method: "GET",
-        headers: {
-          "x-auth-token": `${user.token}`,
-        },
+
       })
         .then((data) => data.json())
         .then((tvShow) => setWebSeries(tvShow));
@@ -206,9 +204,7 @@ function CastCrew({ showId, token }) {
   const getShowCrew = () => {
     fetch(`${API}/TVShows/${showId}`, {
       method: "GET",
-      headers: {
-        "x-auth-token": `${token}`,
-      },
+
     })
       .then((data) => data.json())
       .then((tvShow) => setShowCast(tvShow.casts));
@@ -238,9 +234,7 @@ function Producer({ showId, token }) {
   const getShowCrew = () => {
     fetch(`${API}/TVShows/${showId}`, {
       method: "GET",
-      headers: {
-        "x-auth-token": `${token}`,
-      },
+
     })
       .then((data) => data.json())
       .then((tvShow) => setShowCast(tvShow.producers));

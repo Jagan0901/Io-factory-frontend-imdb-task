@@ -1,35 +1,58 @@
 import { MoviesList } from "../Components/MoviesList";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { API } from "../api";
 import { Loading } from "../Components/Loading";
 import { NavBar } from "../Components/NavBar";
+import { UserState } from "../Context/UsersProvider";
+import { useNavigate } from "react-router-dom";
 
 export function Movies() {
-  const [moviesList, setMoviesList] = useState(null);
+  const [webSeriesList, setWebSeriesList] = useState(null);
+  // const { user } = UserState();
+  const [user, setUser] = useState();
+  const navigate = useNavigate();
+  // console.log(user.token);
 
-  const getMovies = () => {
-    fetch(`${API}/Movies`, {
-      method: "GET",
-      headers: {
-        "x-auth-token":
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZGJkZWYzNDYwNzhlMzVlZjM1ZDg3ZiIsImlhdCI6MTY3NTM1NTAyOX0.yavdcq05w3wK_6HYXxMq9KtJ6qVZ12E3GxuEXt_eOSo",
-      },
-    })
-      .then((res) => res.json())
-      .then((movie) => setMoviesList(movie));
+  const userDataInLocalStorage = () => {
+    const userInfo = JSON.parse(localStorage.getItem("imdb-userInfo"));
+    setUser(userInfo);
+
+    if (!userInfo) {
+      navigate("/");
+    }
   };
 
-  useEffect(() => getMovies(), []);
+  useEffect(() => userDataInLocalStorage(), []);
 
-  return moviesList ? (
-    <>
-    <NavBar/>
+  const getShows = () => {
+    if (user) {
+      fetch(`${API}/Movies`, {
+        method: "GET",
+        headers: {
+          "x-auth-token": `${user.token}`,
+        },
+      })
+        .then((data) => data.json())
+        .then((tvShows) => setWebSeriesList(tvShows));
+    }
+  };
+  useEffect(() => getShows(), [user]);
+  // console.log(user);
+
+  return webSeriesList ? (
+    <div>
+      <NavBar />
       <div className="App-container">
-        {moviesList.map((movie) => (
-          <MoviesList movies={movie} key={movie.id} refresh={getMovies} />
+        {webSeriesList?.map((ws) => (
+          <MoviesList
+            key={ws.id}
+            webSeries={ws}
+            refresh={getShows}
+            token={user.token}
+          />
         ))}
       </div>
-    </>
+    </div>
   ) : (
     <Loading />
   );

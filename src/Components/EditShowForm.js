@@ -553,7 +553,6 @@ export function EditShowForm({ series }) {
               body: JSON.stringify(updatedShow),
               headers: {
                 "Content-Type": "application/json",
-                "x-auth-token": `${user.token}`,
               },
             })
               .then((data) => data.json())

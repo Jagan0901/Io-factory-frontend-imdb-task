@@ -16,9 +16,6 @@ export function EditShows() {
   const getShows = () => {
     fetch(`${API}/TVShows/${showId}`, {
       method: "GET",
-      headers: {
-        "x-auth-token": `${user.token}`,
-      },
     })
       .then((data) => data.json())
       .then((show) => setSeries(show));

@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import { API } from "../api";
 import { UserState } from "../Context/UsersProvider";
+import { Loading } from "../Components/Loading";
 
 export function Add_TV_Shows() {
-  const { user } = UserState();
+  // const { user } = UserState();
+  const [user, setUser] = useState();
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [year, setYear] = useState("");
@@ -47,6 +49,17 @@ export function Add_TV_Shows() {
 
   const [status, setStatus] = useState("");
 
+  const userDataInLocalStorage = () => {
+    const userInfo = JSON.parse(localStorage.getItem("imdb-userInfo"));
+    setUser(userInfo);
+
+    if (!userInfo) {
+      navigate("/");
+    }
+  };
+
+  useEffect(() => userDataInLocalStorage(), []);
+
   const navigate = useNavigate();
 
   const statusStyles = {
@@ -54,16 +67,16 @@ export function Add_TV_Shows() {
     color: "red",
   };
 
-  return (
+  return ( user ?
     <div className="add-webSeries">
-      <TextField
+      {/* <TextField
         id="outlined-basic"
         label="TV show id"
         variant="outlined"
         type="number"
         placeholder="Enter any id"
         onChange={(event) => setId(event.target.value)}
-      />
+      /> */}
 
       <TextField
         id="outlined-basic"
@@ -536,5 +549,7 @@ export function Add_TV_Shows() {
       </Button>
       <h3 style={statusStyles}>{status}</h3>
     </div>
+    :
+    <Loading/>
   );
 }

@@ -1,89 +1,92 @@
-import { useState } from "react";
 import { LikeDislike } from "../Components/LikeDislike";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API } from "../api";
-import { NavBar } from "./NavBar";
 
-export function MoviesList({ movies, refresh }) {
+function MoviesList({ webSeries, refresh, token }) {
   const [show, setShow] = useState(true);
-  const navigate = useNavigate();
 
   const ratingStyles = {
     color:
-      movies.rating >= 9
+      webSeries.rating >= 9
         ? "darkGoldenrod"
-        : movies.rating >= 8
+        : webSeries.rating >= 8
         ? "green"
         : "red",
     fontWeight: "bold",
   };
-
   const likeDeleteEdit = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
   };
-
+  // const summaryStyles = {
+  //   display: show ? 'block' : 'none'
+  // }
+  // const [navigate,setNavigate] = useNavigate()
+  const navigate = useNavigate();
   return (
     <>
-    <NavBar/>
-      <div className="movie-container">
-        <img className="movie-poster" src={movies.poster} alt={movies.name} />
-        <div className="movie-N-btn-p">
-          <div className="movie-N-btn">
-            <h2 className="movie-name">{movies.name}</h2>
-            <IconButton
-              onClick={() => {
-                setShow(!show);
-              }}
-            >
+      <div className="webSeries-container">
+        <img
+          className="webSeries-poster"
+          src={webSeries.poster}
+          alt={webSeries.name}
+        />
+        <div className="webSeries-specs">
+          <div className="webSeries-N-btn">
+            <h3 className="webSeries-name">
+              {webSeries.name}- {webSeries.year}
+            </h3>
+            <IconButton onClick={() => setShow(!show)}>
               {show ? (
-                <ExpandLessIcon className="movie-toggle" />
+                <ExpandLessIcon className="webSeries-toggle" />
               ) : (
-                <ExpandMoreIcon className="movie-toggle" />
+                <ExpandMoreIcon className="webSeries-toggle" />
               )}
             </IconButton>
-
             <IconButton
+              aria-label="info"
               color="primary"
-              onClick={() => navigate(`/Movies/${movies.id}`)}
+              onClick={() => navigate(`/Movies/${webSeries.id}`)}
             >
-              <InfoIcon className="movie-info" />
+              <InfoIcon className="webSeries-info" />
             </IconButton>
           </div>
-          <p className="movie-rating" style={ratingStyles}>
-            ⭐{movies.rating}
+          <p className="webSeries-rating" style={ratingStyles}>
+            ⭐{webSeries.rating}{" "}
           </p>
         </div>
-        {show ? <p className="movie-summary">{movies.summary}</p> : ""}
+        {show ? <p className="webSeries-summary">{webSeries.summary}</p> : ""}
         <div style={likeDeleteEdit}>
           <LikeDislike />
           <div>
             <IconButton
+              aria-label="delete"
               color="error"
-              onClick={() => {
-                fetch(`${API}/Movies/${movies.id}`, {
+              onClick={() =>
+                fetch(`${API}/Movies/${webSeries.id}`, {
                   method: "DELETE",
                   headers: {
-                    "x-auth-token":
-                      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZGJkZWYzNDYwNzhlMzVlZjM1ZDg3ZiIsImlhdCI6MTY3NTM1NTAyOX0.yavdcq05w3wK_6HYXxMq9KtJ6qVZ12E3GxuEXt_eOSo",
+                    "x-auth-token": `${token}`,
                   },
-                }).then(() => refresh());
-              }}
+                }).then(() => refresh())
+              }
             >
               <DeleteIcon />
             </IconButton>
             <IconButton
+              aria-label="edit"
               color="secondary"
-              onClick={() => navigate(`/Movies/edit/${movies.id}`)}
+              onClick={() => navigate(`/Movies/edit/${webSeries.id}`)}
             >
-              <EditIcon className="" />
+              <EditIcon />
             </IconButton>
           </div>
         </div>
@@ -91,3 +94,5 @@ export function MoviesList({ movies, refresh }) {
     </>
   );
 }
+
+export { MoviesList };

@@ -1,29 +1,41 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { API } from "../api";
 // import Button from "@mui/material/Button";
 // import TextField from "@mui/material/TextField";
 // import { useNavigate } from "react-router-dom";
-import { API } from "../api";
+import { useState, useEffect } from "react";
 import { Loading } from "../Components/Loading";
-import {EditMovieForm} from "../Components/EditMovieForm"
+import { EditMovieForm } from "../Components/EditMovieForm";
+import { UserState } from "../Context/UsersProvider";
 
 export function EditMovies() {
-  // const moviesList = INITIAL_MOVIES_LIST;
-
+  // const { user } = UserState();
+  const [user, setUser] = useState();
   const { movieId } = useParams();
-  const [movie, setMovie] = useState(null);
+  const [series, setSeries] = useState(null);
 
-  const getMovieInfo = () => {
+  const navigate = useNavigate();
+
+  const userDataInLocalStorage = () => {
+    const userInfo = JSON.parse(localStorage.getItem("imdb-userInfo"));
+    setUser(userInfo);
+
+    if (!userInfo) {
+      navigate("/");
+    }
+  };
+
+  useEffect(() => userDataInLocalStorage(), []);
+
+  const getShows = () => {
     fetch(`${API}/Movies/${movieId}`, {
       method: "GET",
     })
       .then((data) => data.json())
-      .then((mv) => setMovie(mv));
+      .then((show) => setSeries(show));
   };
 
-  useEffect(() => getMovieInfo(), []);
+  useEffect(() => getShows(), []);
 
-  return movie ? <EditMovieForm movie={movie} /> : <Loading />;
+  return series && user ? <EditMovieForm series={series} /> : <Loading />;
 }
-
-
